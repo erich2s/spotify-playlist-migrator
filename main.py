@@ -11,13 +11,14 @@ client_secret = 'YOUR_CLIENT_SECRET'
 redirect_uri = 'http://localhost:3000/callback'
 
 client_credentials_manager = SpotifyClientCredentials(client_id, client_secret)
-OAuth_manager = SpotifyOAuth(client_id, client_secret, redirect_uri, scope='playlist-modify-public') 
+OAuth_manager = SpotifyOAuth(
+    client_id, client_secret, redirect_uri, scope='playlist-modify-public')
 scope = "playlist-modify-public"
 sp = spotipy.Spotify(auth_manager=OAuth_manager)
 # 老帐号的用户名ID
-old_username = '31x3bhue4vu4uzdngeca6rfhhbsa'
+old_username = 'YOUR_OLD_USERNAME'
 # 新帐号的用户名ID
-new_username = '31o7jn6lunww5c2td4zu63fgsfuu'
+new_username = 'YOUR_NEW_USERNAME'
 # 根据网速设置延时加入歌曲，网速慢就延时长一点，反之延时短一点
 ADD_TO_PLAYLIST_DURATION = 0.2
 # ----------------设置结束----------------------
@@ -31,21 +32,24 @@ def transfer_playlist_process(index):
         playlist_id = playlists['items'][index]['id']
         # 获取一个歌单中的所有歌曲
         playlist = sp.playlist_tracks(playlist_id)
-        print("playlist:\""+playlists['items'][index]['name']+"\" is transferring...")
+        print("playlist:\""+playlists['items']
+              [index]['name']+"\" is transferring...")
         tracks = playlist['items']
         # tracks按加入时间排序
         tracks.sort(key=lambda x: x['added_at'])
-        tracks_uri = [track['track']['uri'] for track in tracks if track['track'] is not None and track['track']['uri'].startswith('spotify:track')]
+        tracks_uri = [track['track']['uri'] for track in tracks if track['track']
+                      is not None and track['track']['uri'].startswith('spotify:track')]
         # 在新账户下创建歌单
         new_playlist = sp.user_playlist_create(new_username, playlists['items'][index]['name'],
-                                            playlists['items'][index]['public'], description=playlists['items'][index]['description'])
-        
+                                               playlists['items'][index]['public'], description=playlists['items'][index]['description'])
+
         for i in range(len(tracks_uri)):
             sp.playlist_add_items(new_playlist['id'], [tracks_uri[i]])
             # 根据网速设置延时加入歌曲，网速慢就延时长一点，反之延时短一点
             time.sleep(ADD_TO_PLAYLIST_DURATION)
     except Exception as e:
         print(e)
+
 
 # 创建多个线程，每个线程负责一个歌单的转移
 thread_list = []
